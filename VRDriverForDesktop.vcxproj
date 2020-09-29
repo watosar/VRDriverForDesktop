@@ -28,6 +28,9 @@
     <ClInclude Include="Driver\headers\ShareMem.h" />
     <ClInclude Include="Driver\src\driverlog.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{B2772BB2-6AFC-48E6-9C88-F02B18A15128}</ProjectGuid>
