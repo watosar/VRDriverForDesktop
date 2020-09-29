@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VRDriverForDesktop", "VRDriverForDesktop.vcxproj", "{B2772BB2-6AFC-48E6-9C88-F02B18A15128}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VRDriverForDesktop_ClientApp", "VRDriverForDesktop_ClientApp\VRDriverForDesktop_ClientApp.vcxproj", "{4E5E28C9-D3DF-46F5-98B8-9530F25B3938}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VRDriverForDesktop_ClientApp", "ClientApp\VRDriverForDesktop_ClientApp.vcxproj", "{4E5E28C9-D3DF-46F5-98B8-9530F25B3938}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

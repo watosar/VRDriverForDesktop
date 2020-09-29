@@ -18,6 +18,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Driver\src\driver.cpp" />
+    <ClCompile Include="Driver\src\driverlog.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Documents\Visual Studio 2019\Lib\C++\openvr-1.14.15\openvr-1.14.15\headers\openvr_driver.h" />
+    <ClInclude Include="Driver\headers\picojson.h" />
+    <ClInclude Include="Driver\headers\ShareMem.h" />
+    <ClInclude Include="Driver\src\driverlog.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{B2772BB2-6AFC-48E6-9C88-F02B18A15128}</ProjectGuid>
@@ -99,6 +109,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Naosumi\Documents\Visual Studio 2019\Lib\C++\openvr-1.14.15\openvr-1.14.15\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
