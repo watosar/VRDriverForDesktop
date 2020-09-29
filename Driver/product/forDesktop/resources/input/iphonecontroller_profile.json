@@ -1,0 +1,84 @@
+{
+	"jsonid": "input_profile",
+	"legacy_binding": "{forDesktop}/input/legacy_binding_iphonecontroller.json",
+	"controller_type": "iphonecontroller",
+	"input_bindingui_mode": "controller_handed",
+	"input_bindingui_left": {
+		"transform": "scale(-1,1)",
+		"image": "{htc}/icons/vive_wand.svg"
+	},
+	"input_bindingui_right": {
+		"image": "{htc}/icons/vive_wand.svg"
+	},
+	"input_source": {
+		"/input/trigger": {
+			"type": "trigger",
+			"click": true,
+			"value": true,
+			"binding_image_point": [
+				41,
+				64
+			],
+			"order": 1
+		},
+		"/input/trackpad": {
+			"type": "trackpad",
+			"click": true,
+			"touch": true,
+			"binding_image_point": [
+				66,
+				59
+			],
+			"order": 2
+		},
+		"/input/a": {
+			"type": "button",
+			"click": true,
+			"binding_image_point": [
+				52,
+				87
+			],
+			"order": 3
+		},
+		"/input/b": {
+			"type": "button",
+			"click": true,
+			"binding_image_point": [
+				64,
+				35
+			],
+			"order": 4
+		},
+		"/input/system": {
+			"type": "button",
+			"click": true,
+			"touch": true,
+			"binding_image_point": [
+				67,
+				81
+			],
+			"order": 5
+		},
+		"/output/haptic": {
+			"type": "vibration",
+			"binding_image_point": [
+				66,
+				59
+			],
+			"order": 6
+		},
+		"/pose/raw": {
+			"type": "pose",
+			"binding_image_point": [
+				62,
+				16
+			]
+		}
+	},
+	"default_bindings": [
+		{
+			"app_key": "openvr.component.vrcompositor",
+			"binding_url": "vrcompositor_binding_iphonecontroller.json"
+		}
+	]
+}

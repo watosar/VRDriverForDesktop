@@ -1,0 +1,10 @@
+{
+	"alwaysActivate": false,
+	"name" : "forDesktop",
+	"directory" : "",
+	"resourceOnly" : false,
+	"hmd_presence" :
+	[
+		"*.*"
+	]
+}
