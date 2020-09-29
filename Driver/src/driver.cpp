@@ -88,7 +88,7 @@ class CWatchdogDriver_ForDesktop : public IVRWatchdogProvider
     std::thread* m_pWatchdogThread;
 };
 
-CWatchdogDriver_ForDesktop g_watchdogDriverNull;
+CWatchdogDriver_ForDesktop g_watchdogDriver;
 
 
 bool g_bExiting = false;
@@ -361,6 +361,76 @@ class CForDesktopDeviceDriver : public vr::ITrackedDeviceServerDriver, public vr
         pose.qWorldFromDriverRotation = HmdQuaternion_Init(1, 0, 0, 0);
         pose.qDriverFromHeadRotation = HmdQuaternion_Init(1, 0, 0, 0);
 
+        int screenWidth = GetSystemMetrics(SM_CXMAXTRACK);
+        int screenHeight = GetSystemMetrics(SM_CYMAXTRACK);
+
+        if (mouseIsLocked) {
+            POINT po;
+            GetCursorPos(&po);
+            head_pitch += double(double(screenWidth) / 2.0 - po.x) * 0.01;
+            head_roll += double(double(screenHeight) / 2.0 - po.y) * 0.01;
+        }
+
+        if ((GetAsyncKeyState(VK_END) & 0x8000) != 0) {
+            head_yaw = 0;
+            // pitch = 0;
+            // roll = 0;
+            frontDire = head_pitch;
+        }
+
+        double cos_pitch = cos(head_pitch);
+        double sin_pitch = sin(head_pitch);
+
+        if ((GetAsyncKeyState(VK_UP) & 0x8000) != 0) {
+            z += -0.01 * cos_pitch;
+            x += -0.01 * sin_pitch;
+        }
+        if ((GetAsyncKeyState(VK_DOWN) & 0x8000) != 0) {
+            z += 0.01 * cos_pitch;
+            x += 0.01 * sin_pitch;
+        }
+
+        if ((GetAsyncKeyState(VK_LEFT) & 0x8000) != 0) {
+            x += -0.01 * cos_pitch;
+            z -= -0.01 * sin_pitch;
+        }
+        if ((GetAsyncKeyState(VK_RIGHT) & 0x8000) != 0) {
+            x += 0.01 * cos_pitch;
+            z -= 0.01 * sin_pitch;
+        }
+
+        if ((GetAsyncKeyState(VK_PRIOR) & 0x8000) != 0) {
+            y += 0.01;
+        }
+        if ((GetAsyncKeyState(VK_NEXT) & 0x8000) != 0) {
+            y += -0.01;
+        }
+
+        if ((GetAsyncKeyState(VK_HOME) & 0x8000) != 0) {
+            x = 0;
+            y = 0;
+            z = 0;
+        }
+
+        pose.vecPosition[0] = x;
+        pose.vecPosition[1] = y;
+        pose.vecPosition[2] = z;
+
+        // Convert yaw, pitch, roll to quaternion
+        double t0, t1, t2, t3, t4, t5;
+        t0 = cos(head_yaw * 0.5);
+        t1 = sin(head_yaw * 0.5);
+        t2 = cos(head_roll * 0.5);
+        t3 = sin(head_roll * 0.5);
+        t4 = cos(head_pitch * 0.5);
+        t5 = sin(head_pitch * 0.5);
+
+        // Set head tracking rotation
+        pose.qRotation.w = t0 * t2 * t4 + t1 * t3 * t5;
+        pose.qRotation.x = t0 * t3 * t4 - t1 * t2 * t5;
+        pose.qRotation.y = t0 * t2 * t5 + t1 * t3 * t4;
+        pose.qRotation.z = t1 * t2 * t4 - t0 * t3 * t5;
+
 
         return pose;
     }
@@ -411,9 +481,9 @@ class CForDesktopControllerDriver : public vr::ITrackedDeviceServerDriver
         m_unObjectId = vr::k_unTrackedDeviceIndexInvalid;
         m_ulPropertyContainer = vr::k_ulInvalidPropertyContainer;
 
-        m_sSerialNumber = "CTRL_1234";
+        m_sSerialNumber = "CTRL_0001";
 
-        m_sModelNumber = "MyController";
+        m_sModelNumber = "iPhoneController";
     }
 
 
@@ -436,8 +506,9 @@ class CForDesktopControllerDriver : public vr::ITrackedDeviceServerDriver
         m_unObjectId = unObjectId;
         m_ulPropertyContainer = vr::VRProperties()->TrackedDeviceToPropertyContainer(m_unObjectId);
 
-        vr::VRProperties()->SetStringProperty(m_ulPropertyContainer, Prop_ModelNumber_String, m_sModelNumber.c_str());
-        vr::VRProperties()->SetStringProperty(m_ulPropertyContainer, Prop_RenderModelName_String, m_sModelNumber.c_str());
+        vr::VRProperties()->SetStringProperty(m_ulPropertyContainer, vr::Prop_ModelNumber_String, "ViveMV");
+        vr::VRProperties()->SetStringProperty(m_ulPropertyContainer, vr::Prop_ManufacturerName_String, "HTC");
+        vr::VRProperties()->SetStringProperty(m_ulPropertyContainer, vr::Prop_RenderModelName_String, "vr_controller_vive_1_5");
 
         // return a constant that's not 0 (invalid) or 1 (reserved for Oculus)
         vr::VRProperties()->SetUint64Property(m_ulPropertyContainer, Prop_CurrentUniverseId_Uint64, 2);
@@ -449,16 +520,43 @@ class CForDesktopControllerDriver : public vr::ITrackedDeviceServerDriver
         vr::VRProperties()->SetBoolProperty(m_ulPropertyContainer, Prop_NeverTracked_Bool, true);
 
         // even though we won't ever track we want to pretend to be the right hand so binding will work as expected
-        vr::VRProperties()->SetInt32Property(m_ulPropertyContainer, Prop_ControllerRoleHint_Int32, TrackedControllerRole_RightHand);
+        int hand_rl;
+        if (controllerIndex == 0) {
+            hand_rl = TrackedControllerRole_RightHand;
+        }
+        else {
+            hand_rl = TrackedControllerRole_LeftHand;
+        }
+        vr::VRProperties()->SetInt32Property(m_ulPropertyContainer, Prop_ControllerRoleHint_Int32, hand_rl);
 
         // this file tells the UI what to show the user for binding this controller as well as what default bindings should
         // be for legacy or other apps
         vr::VRProperties()->SetStringProperty(m_ulPropertyContainer, Prop_InputProfilePath_String, "{forDesktop}/input/iphonecontroller_profile.json");
 
         // create all the input components
-        vr::VRDriverInput()->CreateBooleanComponent(m_ulPropertyContainer, "/input/a/click", &m_compA);
-        vr::VRDriverInput()->CreateBooleanComponent(m_ulPropertyContainer, "/input/b/click", &m_compB);
-        vr::VRDriverInput()->CreateBooleanComponent(m_ulPropertyContainer, "/input/c/click", &m_compC);
+        vr::VRDriverInput()->CreateBooleanComponent(m_ulPropertyContainer,
+            "/input/a/click", &m_compA);
+        vr::VRDriverInput()->CreateBooleanComponent(m_ulPropertyContainer,
+            "/input/b/click", &m_compB);
+        vr::VRDriverInput()->CreateBooleanComponent(
+            m_ulPropertyContainer, "/input/system/click", &m_compSystem);
+
+        vr::VRDriverInput()->CreateBooleanComponent(
+            m_ulPropertyContainer, "/input/trigger/click", &m_compTrigger);
+        vr::VRDriverInput()->CreateScalarComponent(
+            m_ulPropertyContainer, "/input/trigger/value", &m_compTriggerValue,
+            VRScalarType_Absolute, VRScalarUnits_NormalizedOneSided);
+
+        vr::VRDriverInput()->CreateBooleanComponent(
+            m_ulPropertyContainer, "/input/trackpad/touch", &m_compTrackpadTouch);
+        vr::VRDriverInput()->CreateBooleanComponent(
+            m_ulPropertyContainer, "/input/trackpad/click", &m_compTrackpadClick);
+        vr::VRDriverInput()->CreateScalarComponent(
+            m_ulPropertyContainer, "/input/trackpad/x", &m_compTrackpadX,
+            VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
+        vr::VRDriverInput()->CreateScalarComponent(
+            m_ulPropertyContainer, "/input/trackpad/y", &m_compTrackpadY,
+            VRScalarType_Absolute, VRScalarUnits_NormalizedTwoSided);
 
         // create our haptic component
         vr::VRDriverInput()->CreateHapticComponent(m_ulPropertyContainer, "/output/haptic", &m_compHaptic);
@@ -508,6 +606,46 @@ class CForDesktopControllerDriver : public vr::ITrackedDeviceServerDriver
         pose.qWorldFromDriverRotation = HmdQuaternion_Init(1, 0, 0, 0);
         pose.qDriverFromHeadRotation = HmdQuaternion_Init(1, 0, 0, 0);
 
+        double head_front = head->frontDire;
+
+        if ((GetAsyncKeyState(VK_HOME) & 0x8000) != 0) {
+            memcpy(posCorrectionValues, rawPosValues, sizeof(rawPosValues));
+            controller_roll = controller_yaw = 0;
+            controller_pitch = head_front;
+        }
+        if ((GetAsyncKeyState(VK_END) & 0x8000) != 0) {
+            controller_roll = controller_yaw = 0;
+            controller_pitch = head_front;
+        }
+
+        double x = rawPosValues[0] - posCorrectionValues[0] +
+            0.2 * (1.0 - 2.0 * (double)controllerIndex);
+        double y = rawPosValues[1] - posCorrectionValues[1] - 0.3;
+        double z = rawPosValues[2] - posCorrectionValues[2] - 0.3;
+
+        pose.vecPosition[0] = x * cos(head_front) + z * sin(head_front) + head->x;
+        pose.vecPosition[1] = y + head->y;
+        pose.vecPosition[2] = z * cos(head_front) - x * sin(head_front) + head->z;
+
+        controller_roll += rotDiffValues[0];
+        controller_pitch += rotDiffValues[1];
+        controller_yaw += rotDiffValues[2];
+
+        double cY, sY, cR, sR, cP, sP;
+        // Convert yaw, pitch, roll to quaternion
+        cR = cos(controller_roll * 0.5);
+        sR = sin(controller_roll * 0.5);
+        cP = cos(controller_pitch * 0.5);
+        sP = sin(controller_pitch * 0.5);
+        cY = cos(controller_yaw * 0.5);
+        sY = sin(controller_yaw * 0.5);
+
+        // Set controller rotation
+        pose.qRotation.w = cR * cP * cY + sR * sP * sY;
+        pose.qRotation.x = sR * cP * cY - cR * sP * sY;
+        pose.qRotation.y = cR * sP * cY + sR * cP * sY;
+        pose.qRotation.z = -sR * sP * cY + cR * cP * sY;
+
         return pose;
     }
 
@@ -519,9 +657,29 @@ class CForDesktopControllerDriver : public vr::ITrackedDeviceServerDriver
         // in to UpdateBooleanComponent. This could happen in RunFrame or on a thread of your own that's reading USB
         // state. There's no need to update input state unless it changes, but it doesn't do any harm to do so.
 
-        vr::VRDriverInput()->UpdateBooleanComponent(m_compA, (0x8000 & GetAsyncKeyState('A')) != 0, 0);
-        vr::VRDriverInput()->UpdateBooleanComponent(m_compB, (0x8000 & GetAsyncKeyState('B')) != 0, 0);
-        vr::VRDriverInput()->UpdateBooleanComponent(m_compC, (0x8000 & GetAsyncKeyState('C')) != 0, 0);
+        vr::VRDriverInput()->UpdateBooleanComponent(
+            m_compA, (0x8000 & GetAsyncKeyState('Z')) != 0, 0);
+        vr::VRDriverInput()->UpdateBooleanComponent(
+            m_compB, (0x8000 & GetAsyncKeyState('X')) != 0, 0);
+
+        double trackX, trackY;
+        trackX = trackpadValues[0];
+        trackY = trackpadValues[1];
+        bool trackTouch = (trackX != 0.0) || (trackY != 0.0);
+        vr::VRDriverInput()->UpdateBooleanComponent(m_compTrackpadTouch, trackTouch,
+            0);
+        vr::VRDriverInput()->UpdateBooleanComponent(m_compTrackpadClick,
+            trackpadClicked, 0);
+        vr::VRDriverInput()->UpdateScalarComponent(m_compTrackpadX, trackX, 0);
+        vr::VRDriverInput()->UpdateScalarComponent(m_compTrackpadY, trackY, 0);
+
+        bool triggerOn = (triggerValue > 0.0);
+        vr::VRDriverInput()->UpdateBooleanComponent(m_compTrigger, triggerOn, 0);
+        vr::VRDriverInput()->UpdateScalarComponent(m_compTriggerValue, triggerValue,
+            0);
+
+        vr::VRServerDriverHost()->TrackedDevicePoseUpdated(m_unObjectId, GetPose(),
+            sizeof(DriverPose_t)); 
         #endif
     }
 
@@ -617,11 +775,12 @@ class CServerDriver_ForDesktop : public IServerTrackedDeviceProvider
     double preControllerRot[3] = { 0.0 };
 
     private:
-    CForDesktopDeviceDriver* m_pNullHmdLatest = nullptr;
-    CForDesktopControllerDriver* m_pController = nullptr;
+    CForDesktopDeviceDriver* m_pHmdLatest = nullptr;
+    CForDesktopControllerDriver* m_pController_r = nullptr;
+    CForDesktopControllerDriver* m_pController_l = nullptr;
 };
 
-CServerDriver_ForDesktop g_serverDriverNull;
+CServerDriver_ForDesktop g_serverDriver;
 
 
 EVRInitError CServerDriver_ForDesktop::Init(vr::IVRDriverContext* pDriverContext)
@@ -629,13 +788,19 @@ EVRInitError CServerDriver_ForDesktop::Init(vr::IVRDriverContext* pDriverContext
     VR_INIT_SERVER_DRIVER_CONTEXT(pDriverContext);
     InitDriverLog(vr::VRDriverLog());
 
-    m_pNullHmdLatest = new CForDesktopDeviceDriver();
-    vr::VRServerDriverHost()->TrackedDeviceAdded(m_pNullHmdLatest->GetSerialNumber().c_str(), vr::TrackedDeviceClass_HMD, m_pNullHmdLatest);
+    m_pHmdLatest = new CForDesktopDeviceDriver();
+    vr::VRServerDriverHost()->TrackedDeviceAdded(m_pHmdLatest->GetSerialNumber().c_str(), vr::TrackedDeviceClass_HMD, m_pHmdLatest);
 
-    m_pController = new CForDesktopControllerDriver();
-    m_pController->setIndex(0);
-    m_pController->setHead(m_pNullHmdLatest);
-    vr::VRServerDriverHost()->TrackedDeviceAdded(m_pController->GetSerialNumber().c_str(), vr::TrackedDeviceClass_Controller, m_pController);
+    m_pController_r = new CForDesktopControllerDriver();
+    m_pController_r->setIndex(0);
+    m_pController_r->setHead(m_pHmdLatest);
+    vr::VRServerDriverHost()->TrackedDeviceAdded(m_pController_r->GetSerialNumber().c_str(), vr::TrackedDeviceClass_Controller, m_pController_r);
+
+    m_pController_l = new CForDesktopControllerDriver();
+    m_pController_l->setIndex(1);
+    m_pController_l->setHead(m_pHmdLatest);
+    vr::VRServerDriverHost()->TrackedDeviceAdded(m_pController_l->GetSerialNumber().c_str(), vr::TrackedDeviceClass_Controller, m_pController_l);
+
 
     return VRInitError_None;
 }
@@ -643,30 +808,112 @@ EVRInitError CServerDriver_ForDesktop::Init(vr::IVRDriverContext* pDriverContext
 void CServerDriver_ForDesktop::Cleanup()
 {
     CleanupDriverLog();
-    delete m_pNullHmdLatest;
-    m_pNullHmdLatest = NULL;
-    delete m_pController;
-    m_pController = NULL;
+    delete m_pHmdLatest;
+    m_pHmdLatest = NULL;
+    delete m_pController_r;
+    m_pController_r = NULL;
+    delete m_pController_l;
+    m_pController_l = NULL;
 }
 
 
 void CServerDriver_ForDesktop::RunFrame()
 {
-    if (m_pNullHmdLatest)
-    {
-        m_pNullHmdLatest->RunFrame();
+
+    char* SharedRam = (char*)comm.get_pointer();
+    bool shramhasdata = (SharedRam[0] != 'x');
+
+    if (shramhasdata) {
+        // json解析
+        std::string json = SharedRam;
+        picojson::value j;
+        std::string err = picojson::parse(j, json);
+        if (!err.empty()) {
+            DriverLog("json error: %s\n", err.c_str());
+        }
+        else {
+            double controllerid;
+            GetDoubleValue(controllerid, j, "id");
+
+            double trackpadValues[2] = { 0.0 };
+            bool trackpadClicked = false;
+            double controllerPos[3] = { 0.0 }, controllerRot[3] = { 0.0 },
+                controllerRotDiff[3] = { 0.0 };
+            double triggerValue = 0.0;
+
+            GetDoubleArry(trackpadValues, 2, j, "trackpad");
+            GetBoolValue(trackpadClicked, j, "clicked");
+            GetDoubleArry(controllerPos, 3, j, "translation");
+            GetDoubleArry(controllerRot, 3, j, "rotation");
+            GetDoubleValue(triggerValue, j, "trigger");
+
+            controllerRotDiff[0] =
+                fmod(controllerRot[0] - preControllerRot[0], 90.0) / 360.0;
+            controllerRotDiff[1] =
+                fmod(controllerRot[1] - preControllerRot[1], 90.0) / 360.0;
+            controllerRotDiff[2] =
+                fmod(controllerRot[2] - preControllerRot[2], 90.0) / 360.0;
+            memcpy(preControllerRot, controllerRot, sizeof(controllerRot));
+
+            if (controllerid == 0.0) {
+                m_pController_r->setInputValues(controllerPos, controllerRotDiff,
+                    trackpadValues, trackpadClicked,
+                    triggerValue);
+                m_pController_l->setRotDiffNone();
+            }
+            else if (controllerid == 1.0) {
+                m_pController_l->setInputValues(controllerPos, controllerRotDiff,
+                    trackpadValues, trackpadClicked,
+                    triggerValue);
+                m_pController_r->setRotDiffNone();
+            }
+        }
     }
-    if (m_pController)
+
+
+    if (m_pHmdLatest)
     {
-        m_pController->RunFrame();
+        m_pHmdLatest->RunFrame();
     }
+    if (m_pController_r)
+    {
+        m_pController_r->RunFrame();
+    }
+    if (m_pController_l)
+    {
+        m_pController_l->RunFrame();
+    }
+
+    if (shramhasdata) {
+        //データ待ちフラグを立てる
+        SharedRam[1] = '\0';
+        SharedRam[0] = 'x';
+    }
+
+    // mouse lock
+    bool mouseMidIsOn = ((GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0);
+    if (mouseMidIsOn && !mouseMidOnIsContinuing) {
+        mouseIsLocked = !mouseIsLocked;
+    }
+    mouseMidOnIsContinuing = mouseMidIsOn;
+
+    if (mouseIsLocked) {
+        SetCursorPos(GetSystemMetrics(SM_CXMAXTRACK) / 2, GetSystemMetrics(SM_CYMAXTRACK) / 2);
+    }
+
+    // tracking flg
+    bool rCtrlIsOn = ((GetAsyncKeyState(VK_RCONTROL) & 0x8000) != 0);
+    if (rCtrlIsOn && !rCtrlOnIsCOntinuing) {
+        rCtrlIsLocked = !rCtrlIsLocked;
+    }
+    rCtrlOnIsCOntinuing = rCtrlIsOn;
 
     vr::VREvent_t vrEvent;
     while (vr::VRServerDriverHost()->PollNextEvent(&vrEvent, sizeof(vrEvent)))
     {
-        if (m_pController)
+        if (m_pController_r)
         {
-            m_pController->ProcessEvent(vrEvent);
+            m_pController_r->ProcessEvent(vrEvent);
         }
     }
 }
@@ -678,11 +925,11 @@ HMD_DLL_EXPORT void* HmdDriverFactory(const char* pInterfaceName, int* pReturnCo
 {
     if (0 == strcmp(IServerTrackedDeviceProvider_Version, pInterfaceName))
     {
-        return &g_serverDriverNull;
+        return &g_serverDriver;
     }
     if (0 == strcmp(IVRWatchdogProvider_Version, pInterfaceName))
     {
-        return &g_watchdogDriverNull;
+        return &g_watchdogDriver;
     }
 
     if (pReturnCode)
