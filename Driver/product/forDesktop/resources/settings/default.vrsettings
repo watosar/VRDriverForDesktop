@@ -1,8 +1,8 @@
 {
    "driver_forDesktop" : {
       "enable" : true,
-      "serialNumber" : "0001",
-      "modelNumber" : "dev 1",
+      "serialNumber" : "1234",
+      "modelNumber" : "SampleModel 1",
       "windowX" : 0,
       "windowY" : 0,
       "windowWidth" : 1,

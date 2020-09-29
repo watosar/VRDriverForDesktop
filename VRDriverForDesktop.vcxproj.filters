@@ -40,5 +40,23 @@
     <None Include="README.md">
       <Filter>リソース ファイル</Filter>
     </None>
+    <None Include="Driver\product\forDesktop\resources\settings\default.vrsettings">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Driver\product\forDesktop\resources\driver.vrresources">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Driver\product\forDesktop\driver.vrdrivermanifest">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Driver\product\forDesktop\resources\input\iphonecontroller_profile.json">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Driver\product\forDesktop\resources\input\legacy_binding_iphonecontroller.json">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Driver\product\forDesktop\resources\input\vrcompositor_binding_iphonecontroller.json">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
 </Project>

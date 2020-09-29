@@ -29,6 +29,12 @@
     <ClInclude Include="Driver\src\driverlog.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Driver\product\forDesktop\driver.vrdrivermanifest" />
+    <None Include="Driver\product\forDesktop\resources\driver.vrresources" />
+    <None Include="Driver\product\forDesktop\resources\input\iphonecontroller_profile.json" />
+    <None Include="Driver\product\forDesktop\resources\input\legacy_binding_iphonecontroller.json" />
+    <None Include="Driver\product\forDesktop\resources\input\vrcompositor_binding_iphonecontroller.json" />
+    <None Include="Driver\product\forDesktop\resources\settings\default.vrsettings" />
     <None Include="README.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -88,6 +94,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>.\Driver\product\forDesktop\bin\win64</OutDir>
+    <TargetName>driver_forDesktop</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -111,9 +118,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;DRIVER_SAMPLE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\Naosumi\Documents\Visual Studio 2019\Lib\C++\openvr-1.14.15\openvr-1.14.15\headers;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
