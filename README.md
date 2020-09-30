@@ -1,3 +1,3 @@
 # VRDriver for Desktop
-This made by vrcaht desktop user and made for same users.
-Using this driver with my PyARController, you can move your arms.
+This driver is made for VRChat users forced to play on desktop mode.
+By using this with my [other tool](https://github.com/watosar/PyARController), you can move your arm.
