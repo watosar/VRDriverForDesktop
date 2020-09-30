@@ -184,13 +184,13 @@ class CForDesktopDeviceDriver : public vr::ITrackedDeviceServerDriver, public vr
         m_flSecondsFromVsyncToPhotons = vr::VRSettings()->GetFloat(k_pch_ForDesktop_Section, k_pch_ForDesktop_SecondsFromVsyncToPhotons_Float);
         m_flDisplayFrequency = vr::VRSettings()->GetFloat(k_pch_ForDesktop_Section, k_pch_ForDesktop_DisplayFrequency_Float);
 
-        DriverLog("driver_null: Serial Number: %s\n", m_sSerialNumber.c_str());
-        DriverLog("driver_null: Model Number: %s\n", m_sModelNumber.c_str());
-        DriverLog("driver_null: Window: %d %d %d %d\n", m_nWindowX, m_nWindowY, m_nWindowWidth, m_nWindowHeight);
-        DriverLog("driver_null: Render Target: %d %d\n", m_nRenderWidth, m_nRenderHeight);
-        DriverLog("driver_null: Seconds from Vsync to Photons: %f\n", m_flSecondsFromVsyncToPhotons);
-        DriverLog("driver_null: Display Frequency: %f\n", m_flDisplayFrequency);
-        DriverLog("driver_null: IPD: %f\n", m_flIPD);
+        DriverLog("driver_forDesktop: Serial Number: %s\n", m_sSerialNumber.c_str());
+        DriverLog("driver_forDesktop: Model Number: %s\n", m_sModelNumber.c_str());
+        DriverLog("driver_forDesktop: Window: %d %d %d %d\n", m_nWindowX, m_nWindowY, m_nWindowWidth, m_nWindowHeight);
+        DriverLog("driver_forDesktop: Render Target: %d %d\n", m_nRenderWidth, m_nRenderHeight);
+        DriverLog("driver_forDesktop: Seconds from Vsync to Photons: %f\n", m_flSecondsFromVsyncToPhotons);
+        DriverLog("driver_forDesktop: Display Frequency: %f\n", m_flDisplayFrequency);
+        DriverLog("driver_forDesktop: IPD: %f\n", m_flIPD);
     }
 
     virtual ~CForDesktopDeviceDriver()
@@ -217,8 +217,7 @@ class CForDesktopDeviceDriver : public vr::ITrackedDeviceServerDriver, public vr
         // avoid "not fullscreen" warnings from vrmonitor
         vr::VRProperties()->SetBoolProperty(m_ulPropertyContainer, Prop_IsOnDesktop_Bool, false);
 
-        vr::VRProperties()->SetBoolProperty(m_ulPropertyContainer,
-            Prop_DisplayDebugMode_Bool, true);
+        vr::VRProperties()->SetBoolProperty(m_ulPropertyContainer, Prop_DisplayDebugMode_Bool, true);
         // Icons can be configured in code or automatically configured by an external file "drivername\resources\driver.vrresources".
         // Icon properties NOT configured in code (post Activate) are then auto-configured by the optional presence of a driver's "drivername\resources\driver.vrresources".
         // In this manner a driver can configure their icons in a flexible data driven fashion by using an external file.
@@ -360,7 +359,7 @@ class CForDesktopDeviceDriver : public vr::ITrackedDeviceServerDriver, public vr
 
         pose.qWorldFromDriverRotation = HmdQuaternion_Init(1, 0, 0, 0);
         pose.qDriverFromHeadRotation = HmdQuaternion_Init(1, 0, 0, 0);
-
+        
         int screenWidth = GetSystemMetrics(SM_CXMAXTRACK);
         int screenHeight = GetSystemMetrics(SM_CYMAXTRACK);
 
@@ -411,11 +410,11 @@ class CForDesktopDeviceDriver : public vr::ITrackedDeviceServerDriver, public vr
             y = 0;
             z = 0;
         }
-
+        
         pose.vecPosition[0] = x;
         pose.vecPosition[1] = y;
         pose.vecPosition[2] = z;
-
+        
         // Convert yaw, pitch, roll to quaternion
         double t0, t1, t2, t3, t4, t5;
         t0 = cos(head_yaw * 0.5);
@@ -424,13 +423,13 @@ class CForDesktopDeviceDriver : public vr::ITrackedDeviceServerDriver, public vr
         t3 = sin(head_roll * 0.5);
         t4 = cos(head_pitch * 0.5);
         t5 = sin(head_pitch * 0.5);
-
+        
         // Set head tracking rotation
         pose.qRotation.w = t0 * t2 * t4 + t1 * t3 * t5;
         pose.qRotation.x = t0 * t3 * t4 - t1 * t2 * t5;
         pose.qRotation.y = t0 * t2 * t5 + t1 * t3 * t4;
         pose.qRotation.z = t1 * t2 * t4 - t0 * t3 * t5;
-
+        
 
         return pose;
     }
@@ -449,7 +448,7 @@ class CForDesktopDeviceDriver : public vr::ITrackedDeviceServerDriver, public vr
 
     std::string GetSerialNumber() const { return m_sSerialNumber; }
 
-    double head_yaw = 0, head_pitch = 0, head_roll = 0, x, y, z, frontDire;
+    double head_yaw = 0, head_pitch = 0, head_roll = 0, x=0, y=0, z=0, frontDire=0;
 
 
     private:
@@ -481,7 +480,7 @@ class CForDesktopControllerDriver : public vr::ITrackedDeviceServerDriver
         m_unObjectId = vr::k_unTrackedDeviceIndexInvalid;
         m_ulPropertyContainer = vr::k_ulInvalidPropertyContainer;
 
-        m_sSerialNumber = "CTRL_0001";
+        m_sSerialNumber = "CTRL_0001_";
 
         m_sModelNumber = "iPhoneController";
     }

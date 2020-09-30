@@ -1,14 +1,14 @@
 {
    "driver_forDesktop" : {
       "enable" : true,
-      "serialNumber" : "1234",
-      "modelNumber" : "SampleModel 1",
+      "serialNumber" : "0001",
+      "modelNumber" : "dev 1",
       "windowX" : 0,
       "windowY" : 0,
-      "windowWidth" : 800,
-      "windowHeight" : 400,
-      "renderWidth" : 800,
-      "renderHeight" : 400,
+      "windowWidth" : 1,
+      "windowHeight" : 1,
+      "renderWidth" : 400,
+      "renderHeight" : 300,
       "secondsFromVsyncToPhotons" : 0.011,
       "displayFrequency" : 0
    }
