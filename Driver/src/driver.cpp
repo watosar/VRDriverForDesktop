@@ -766,7 +766,7 @@ class CServerDriver_ForDesktop : public IServerTrackedDeviceProvider
     virtual void Cleanup();
     virtual const char* const* GetInterfaceVersions() { return vr::k_InterfaceVersions; }
     virtual void RunFrame();
-    virtual bool ShouldBlockStandbyMode() { return false; }
+    virtual bool ShouldBlockStandbyMode() { return true; }
     virtual void EnterStandby() {}
     virtual void LeaveStandby() {}
 
