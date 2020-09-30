@@ -7,8 +7,8 @@
       "windowY" : 0,
       "windowWidth" : 1,
       "windowHeight" : 1,
-      "renderWidth" : 800,
-      "renderHeight" : 400,
+      "renderWidth" : 400,
+      "renderHeight" : 300,
       "secondsFromVsyncToPhotons" : 0.011,
       "displayFrequency" : 0
    }

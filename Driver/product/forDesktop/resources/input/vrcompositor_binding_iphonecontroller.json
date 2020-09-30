@@ -10,7 +10,7 @@
                   }
                },
                "mode": "button",
-               "path": "/devices/forDesktop/CTRL_1234/input/b"
+               "path": "/devices/forDesktop/CTRL_0001/input/b"
             }
          ]
       },
@@ -26,7 +26,7 @@
                "parameters": {
                   "sub_mode": "complex"
                },
-               "path": "/devices/forDesktop/CTRL_1234/input/a"
+               "path": "/devices/forDesktop/CTRL_0001/input/a"
             }
          ]
       }
